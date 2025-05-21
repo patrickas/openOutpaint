@@ -419,7 +419,39 @@ const stampTool = () =>
 					const resource = state.selected;
 
 					if (resource) {
-						const real_bb = getBoundingBox(sx,sy,1,1); //TODO:Here we have to get the actual real bounding box somehow
+						// Calculate the real bounding box
+						const image = resource.image;
+						const w = image.width * state.scale;
+						const h = image.height * state.scale;
+
+						// Calculate rotated corners
+						const cx = 0; // Image center x, relative to sx
+						const cy = 0; // Image center y, relative to sy
+						
+						const sinR = Math.sin(rotation);
+						const cosR = Math.cos(rotation);
+
+						const x1 = sx + cx * cosR - cy * sinR;
+						const y1 = sy + cx * sinR + cy * cosR;
+						const x2 = sx + (cx + w) * cosR - cy * sinR;
+						const y2 = sy + (cx + w) * sinR + cy * cosR;
+						const x3 = sx + (cx + w) * cosR - (cy + h) * sinR;
+						const y3 = sy + (cx + w) * sinR + (cy + h) * cosR;
+						const x4 = sx + cx * cosR - (cy + h) * sinR;
+						const y4 = sy + cx * sinR + (cy + h) * cosR;
+						
+						const minX = Math.min(x1, x2, x3, x4);
+						const minY = Math.min(y1, y2, y3, y4);
+						const maxX = Math.max(x1, x2, x3, x4);
+						const maxY = Math.max(y1, y2, y3, y4);
+
+						const real_bb = {
+							x: minX,
+							y: minY,
+							width: maxX - minX,
+							height: maxY - minY,
+						};
+						
 						imageCollection.auto_expand_to_fit(real_bb);
 						state.redraw();
 
